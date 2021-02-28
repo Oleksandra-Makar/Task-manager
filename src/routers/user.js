@@ -4,12 +4,14 @@ const sharp = require('sharp');
 const router = new express.Router();
 const auth = require('../middleware/auth')
 const User = require('../models/user');
+const { sendWelcomeEmail } = require('../emails/account');
 
 router.post('/users', async (req, res) => {
     const user = new User(req.body);
 
     try{
         await user.save();
+        sendWelcomeEmail(user.email, user.name)
         const token = await user.generateAuthToken();
         res.status(201).send({ user, token });
     } catch (e) {
